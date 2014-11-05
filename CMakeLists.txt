@@ -6,16 +6,16 @@ project(GPUPlanSweep)
 
 # Internal files
 set(SRC main.cpp)
-set(INC )
-set(SUBFOLDERS )
+set(INC clgl/include image/include windowManager/include)
+set(SUBFOLDERS clgl image windowManager)
 set(C_FLAGS -std=c++11)
 
 # Compiler flags
 add_definitions(${C_FLAGS})
 
 # Internal header files
-#include_directories(${INC})
-#subdirs(${SUBFOLDERS})
+include_directories(${INC})
+subdirs(${SUBFOLDERS})
 
 # This is only required for the script to work in the version control
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
@@ -34,10 +34,16 @@ add_executable(gpuplansweep ${SRC})
 
 # Link necessary libraries
 target_link_libraries(gpuplansweep 
-                     ${OpenCV_LIBS}
+                     ${OpenCV_LIBS} 
                      ${OpenGL_LIBS}
                      ${GLUT_LIBS}
                      ${GLEW_LIBS}
                      ${OPENCL_LIBRARIES}
                      )
-#target_link_libraries(gpuplansweep )
+
+target_link_libraries(gpuplansweep                     
+                      clgl
+                      image
+                      windowManager
+                     )
+

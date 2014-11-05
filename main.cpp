@@ -7,44 +7,51 @@
  * =====================================================================================
  */
 
-#include <opencv2/opencv.hpp>
+////////////////////////////////////////////////////////////////////////////////////////
+
+#include "clgl.hpp"
+#include "clgl_windows.hpp"
+#include "clgl_linux.hpp"
+#include "window_manager_glut.hpp"
+#include "image_acquirer.hpp"
+#include "main_window_glut.hpp"
+
 #include <CL/cl.hpp>
 #include <vector>
+#include <iostream>
 
+////////////////////////////////////////////////////////////////////////////////////////
+ 
 /* ======= Function ==================================================
  *   Name: main
  *   Description: main entry Function
  * =================================================================== 
  */
-int main(int argc, const char **argv)
+int main(int argc, char *argv[])
 {
-    cv::VideoCapture cap(0); // open the default camera
-    if(!cap.isOpened())  // check if we succeeded
-        return -1;
+    ImageAcquirer img;
+    WindowManagerGlut wmanager(argc, argv, "GPUImageSweep", img);
+#ifdef WIN32
+    CLGLWidows clgl = CLGLWidows(wmanager);
+#else
+    CLGLLinux clgl = CLGLLinux(wmanager);
+#endif
 
-    cv::Mat edges;
-    cv::namedWindow("orignal", 1);
-    cv::namedWindow("edges",1);
-    for(;;)
+    // Prints platforms and devices details
+    std::cout << clgl.platforms()->size() << " platform(s) found !" << std::endl;
+    for(int i=0; i < clgl.platforms()->size(); i++)
     {
-        cv::Mat frame;
-        cap >> frame; // get a new frame from camera
-        cv::cvtColor(frame, edges, CV_BGR2GRAY);
-        cv::GaussianBlur(edges, edges, cv::Size(7,7), 1.5, 1.5);
-        cv::Canny(edges, edges, 0, 30, 3);
-        cv::imshow("edges", edges);
-        cv::imshow("orignal", frame);
-        if(cv::waitKey(30) >= 0) {
-            std::vector<int> comp_params;
-            comp_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-            comp_params.push_back(3);
-
-            cv::imwrite("output.png", edges, comp_params);
-
-            break;
-        }
+        std::cout << clgl.platforms()->at(i).devices()->size() << " device(s) found for platform " << i << " !" << std::endl;
     }
+    std::cout << clgl << std::endl;
+
+    MainWindowGlut::start(img, clgl, wmanager);
+
+    // main loop !
+    wmanager.main_loop();
+
     return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
 
