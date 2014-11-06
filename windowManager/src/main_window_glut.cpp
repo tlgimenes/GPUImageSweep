@@ -10,6 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #include "main_window_glut.hpp"
+#include "image_acquirer_single_camera.hpp"
 
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -18,8 +19,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 WindowManager* MainWindowGlut::wmanager = NULL;
-ImageAcquirer* MainWindowGlut::img = NULL;
+CLGLImage* MainWindowGlut::img1 = NULL;
+CLGLImage* MainWindowGlut::img2 = NULL;
 CLGL* MainWindowGlut::clgl = NULL;
+
+int MainWindowGlut::height = 0;
+int MainWindowGlut::width = 0;
 
 // Hide/Show information
 bool MainWindowGlut::showInfo = true;
@@ -46,75 +51,16 @@ float MainWindowGlut::scale[3] = {1.7, 1.7, 0.3};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct vbo_point_t
-{
-    vbo_point_t() : _x(0.0), _y(0.0), _z(0.0), _w(0.0) {}
-    vbo_point_t(GLfloat x, GLfloat y, GLfloat z, GLfloat w) : _x(x), _y(y), _z(z), _w(w) {}
-    void operator()(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-        _x = x; _y = y; _z = z; _w = w; 
-    }
-    GLfloat _x,_y,_z,_w;
-} vbo_point;
-
-typedef struct vbo_index_t
-{
-    vbo_index_t() : _i1(0), _i2(0), _i3(0) {}
-    vbo_index_t(GLuint i1, GLuint i2, GLuint i3) : _i1(i1), _i2(i2), _i3(i3) {}
-    void operator()(GLuint i1, GLuint i2, GLuint i3) {
-        _i1 = i1; _i2 = i2; _i3 = i3;
-    }
-    GLuint _i1, _i2, _i3;
-} vbo_index;
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-inline vbo_point* gen_image(int width, int height, int& final_size)
-{
-    final_size = width*height;
-    vbo_point* image = new vbo_point[final_size];
-    float max = std::max(width, height);
-
-    for(int i=0; i < height; i++)
-    {
-        for(int j=0; j < width; j++)
-        {
-            image[i*width+j](GLfloat(j-width/2)/max,GLfloat(i-height/2)/max, 0.2f, 0.0f);
-        }
-    }
-
-    return image;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-#define INDEX(i,j) (i) * width + (j)
-
-inline vbo_index* gen_index_buff(int width, int height, int& final_size)
-{
-    final_size = (width-1) * (height-1) * 2;
-    std::vector<vbo_index>* index_buff = new std::vector<vbo_index>();
-    int shift = (height - 2) * width + width - 1;
-
-    for(int i=0; i < height-1; i++)
-    {
-        for(int j=0; j < width-1; j++)
-        {
-            index_buff->push_back(vbo_index(INDEX(i,j), INDEX(i,j+1), INDEX(i+1,j)));
-            index_buff->push_back(vbo_index(INDEX(i+1,j+1), INDEX(i+1,j), INDEX(i,j+1)));
-        }
-    }
-
-    return index_buff->data();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-
 void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager)
 {
     /* Sets objects */
-    MainWindowGlut::img = &img;
+    MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
+    MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
     MainWindowGlut::clgl= &clgl;
     MainWindowGlut::wmanager = &wmanager;
+
+    height = img.height();
+    width  = img.width();
 
     /* Connect callbacks */
     // Idle function callback
@@ -131,13 +77,13 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glDisable(GL_DEPTH_TEST);
 
     // viewport
-    glViewport(0, 0, MainWindowGlut::img->width(), MainWindowGlut::img->height());
+    glViewport(0, 0, width, height);
 
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(90.0, (GLfloat)MainWindowGlut::img->width() / 
-            (GLfloat)MainWindowGlut::img->height(), 0.01, 1000.0);
+    gluPerspective(90.0, (GLfloat)width / 
+            (GLfloat)height, 0.01, 1000.0);
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -146,62 +92,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glTranslatef(0.0, 0.0, MainWindowGlut::translate_z);
     glScalef(MainWindowGlut::scale[0], MainWindowGlut::scale[1], MainWindowGlut::scale[2]);
 
-    //cv::Mat frame0 = MainWindowGlut::img->img1();
-
-    int final_size = 0;
-
-    // Loads image vbos
-    /* vbo_point* image = gen_image(MainWindowGlut::img->width(), MainWindowGlut::img->height(), 
-            final_size);
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ARRAY_BUFFER>(
-            sizeof(vbo_point)*final_size, (const void*)image, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << final_size << " vertex elements to the device" << std::endl;
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ARRAY_BUFFER>(
-            sizeof(vbo_point)*final_size, (const void*)image, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << final_size << " color elements to the device" << std::endl;
-
-    vbo_index* index = gen_index_buff(MainWindowGlut::img->width(), MainWindowGlut::img->height(), 
-            final_size);
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ELEMENT_ARRAY_BUFFER>(
-            sizeof(vbo_index)*final_size, (const void*)index, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << final_size << " index elements to the device" << std::endl;*/
-    vbo_point image[] = {
-        vbo_point(0,0,0,1),
-        vbo_point(0,0,1,1),
-        vbo_point(0,1,0,1),
-        vbo_point(1,0,0,1),
-     //   vbo_point(0,1,1,1),
-     //   vbo_point(1,0,1,1),
-     //   vbo_point(1,1,0,1),
-     //   vbo_point(1,1,1,1)
-    };
-    vbo_point color[] = {
-        vbo_point(1,1,1,1),
-        vbo_point(1,1,1,1),
-        vbo_point(1,1,1,1),
-        vbo_point(1,1,1,1),
-    };
-    vbo_index index[] = {
-        vbo_index(0,1,2),
-        vbo_index(1,2,3),
-        vbo_index(3,2,0),
-        vbo_index(3,1,0)
-    };
-
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ARRAY_BUFFER>(
-            sizeof(image), (const void*)image, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << sizeof(image)/sizeof(vbo_point) << " vertex elements to the device" << std::endl;
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ARRAY_BUFFER>(
-            sizeof(color), (const void*)color, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << sizeof(image)/sizeof(vbo_point) << " color elements to the device" << std::endl;
-
-    MainWindowGlut::clgl->clgl_load_vbo_data_to_device<GL_ELEMENT_ARRAY_BUFFER>(
-            sizeof(index), (const void*)index, CL_MEM_READ_WRITE);
-    std::cout << "pushed " << sizeof(index)/sizeof(vbo_index) << " index elements to the device" << std::endl;
-
-    std::cout << "width: " << MainWindowGlut::img->width() << std::endl;
-    std::cout << "height " << MainWindowGlut::img->height() << std::endl;
-}
+    }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,9 +104,7 @@ void MainWindowGlut::glutIdleFunc_cb()
 {
     MainWindowGlut::calculateFPS();
 
-     //   cv::imshow("frame", MainWindowGlut::img->img1());
-
-     //   cv::waitKey(30);
+    MainWindowGlut::img1->update();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -250,42 +139,23 @@ void MainWindowGlut::glutDisplayFunc_cb()
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
 
-    for(int j=0; j < MainWindowGlut::clgl->platforms()->size(); j++)
-    {
-        for(int i=0; i < MainWindowGlut::clgl->vbos(j)->size()-2; i+=3)
-        {
+    // Binds the vertex VBO's
+    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_coord_vbo_id());
+    glVertexPointer(3, GL_FLOAT, sizeof(point3D<GLfloat>), 0);
+    clgl_assert(glGetError());
 
-            // Binds the vertex VBO's
-            glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::clgl->vbos(j)->at(i));
-            glVertexPointer(3, GL_FLOAT, sizeof(vbo_point), 0);
-            clgl_assert(glGetError());
+    // VBO Color must be inserted in last place
+    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_color_vbo_id());
+    glColorPointer(3, GL_UNSIGNED_BYTE, sizeof(point3D<GLubyte>), 0);
+    clgl_assert(glGetError());
 
-            //VBO Color must be inserted in last place
-            glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::clgl->vbos(j)->at(i+1));
-            glColorPointer(3, GL_FLOAT, sizeof(vbo_point), 0);
-            clgl_assert(glGetError());
+    // Indexed rendering for better performance !
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img1->vertex_index_vbo_id());
+    clgl_assert(glGetError());
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::clgl->vbos(j)->at(i+2));
-            glIndexPointer(GL_INT, sizeof(vbo_index), 0);
-            clgl_assert(glGetError());
-
-            // Draw the simulation points
-            glDrawArrays(GL_POINTS, 0, 
-                    MainWindowGlut::clgl->clgl_get_vbo_bytes_size(
-                        MainWindowGlut::clgl->vbos(j)->at(i), j)/sizeof(vbo_point));
-            clgl_assert(glGetError());
-
-            // Draw the triangles !
-            glDrawElements (
-                    GL_TRIANGLES,      // mode
-                    MainWindowGlut::clgl->clgl_get_vbo_bytes_size(
-                        MainWindowGlut::clgl->vbos(j)->at(i+2), j)/sizeof(vbo_index),    // count
-                    GL_UNSIGNED_INT,   // type
-                    0           // element array buffer
-                    );
-            clgl_assert(glGetError());
-        }
-    }
+    // Draw the triangles !
+    glDrawElements (GL_TRIANGLES, MainWindowGlut::img1->num_index_elements(), GL_UNSIGNED_INT, 0);
+    clgl_assert(glGetError());
 
     glFlush();
 
@@ -324,7 +194,7 @@ void MainWindowGlut::drawInfo(void)
 
         // Draw FPS
         fps << "FPS: " << MainWindowGlut::fps;
-        drawString(fps.str().c_str(), 1, MainWindowGlut::img->height()-MainWindowGlut::fontSize, MainWindowGlut::stringColor, MainWindowGlut::font);
+        drawString(fps.str().c_str(), 1, MainWindowGlut::height-MainWindowGlut::fontSize, MainWindowGlut::stringColor, MainWindowGlut::font);
 
         // Draw How many particles are beeing simulated and if it is paused
         if(MainWindowGlut::play == ON){
@@ -356,7 +226,7 @@ void MainWindowGlut::drawString(const char *str, int x, int y, float color[4], v
     glMatrixMode(GL_PROJECTION);     // switch to projection matrix
     glPushMatrix();                  // save current projection matrix
     glLoadIdentity();                // reset projection matrix
-    gluOrtho2D(0, MainWindowGlut::img->width(), 0, MainWindowGlut::img->height());  // set to orthogonal projection
+    gluOrtho2D(0, MainWindowGlut::width, 0, MainWindowGlut::height);  // set to orthogonal projection
 
     glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT); // lighting and color mask
 

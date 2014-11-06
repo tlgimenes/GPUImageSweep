@@ -16,7 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CLGLLinux::CLGLLinux(WindowManager& manager) : CLGL()
+CLGLLinux::CLGLLinux(WindowManager& manager) : CLGL(manager)
 {
     try {
         std::vector<cl::Platform> platforms;
@@ -26,7 +26,7 @@ CLGLLinux::CLGLLinux(WindowManager& manager) : CLGL()
 
         for(int i=0; i < platforms.size(); i++)
         {
-            this->_platforms->push_back(CLGLSinglePlatformLinux(manager, platforms[i]));
+            this->_platforms->push_back(CLGLSinglePlatformLinux(platforms[i]));
         }
     }
     catch(const cl::Error& error) 

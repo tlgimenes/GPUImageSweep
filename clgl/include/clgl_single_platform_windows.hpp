@@ -28,7 +28,7 @@
 class CLGLSinglePlatformWindows: public CLGLSinglePlatform
 {
   public:
-    CLGLSinglePlatformWindows(WindowManager& manager, cl::Platform* platform);
+    CLGLSinglePlatformWindows(cl::Platform* platform);
     CLGLSinglePlatformWindows(const CLGLSinglePlatformWindows& same);
 
   protected:

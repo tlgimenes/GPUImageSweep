@@ -1,44 +1,36 @@
 /*
  * =====================================================================================
- *       Filename:  clgl_linux.hpp
- *    Description:  
- *        Created:  2014-10-23 16:53
+ *       Filename:  types.hpp
+ *    Description:  File Containning types
+ *        Created:  2014-11-06 17:25
  *         Author:  Tiago Lobato Gimenes        (tlgimenes@gmail.com)
  * =====================================================================================
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CLGL_SINGLE_PLATFORM_LINUX_HPP
-#define CLGL_SINGLE_PLATFORM_LINUX_HPP
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CL_ENABLE_EXCEPTIONS
-#define __CL_ENABLE_EXCEPTIONS
-#endif
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#include "clgl_error.hpp"
-#include "clgl_single_platform.hpp"
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-class CLGLSinglePlatformLinux: public CLGLSinglePlatform
+template <typename T>
+struct point3D
 {
-  public:
-    CLGLSinglePlatformLinux(cl::Platform& platform);
-    CLGLSinglePlatformLinux(const CLGLSinglePlatformLinux& same);
-
-  protected:
-    void clgl_create_context();
-    void clgl_create_command_queue();
+    point3D(T x, T y, T z) : _x(x), _y(y), _z(z) {}
+    T x() { return _x; }
+    T y() { return _y; }
+    T z() { return _z; }
+    T _x, _y, _z;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#endif /* !CLGL_SINGLE_PLATFORM_LINUX_HPP */
+#endif /* !TYPES_HPP */
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

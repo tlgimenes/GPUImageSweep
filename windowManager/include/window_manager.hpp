@@ -20,6 +20,11 @@ class WindowManager
         WindowManager();
 
         /**
+         * Start OpenGL context as well as the WindowManager library
+         * */
+        virtual void init() {};
+            
+        /**
          * Main loop 
          * */
         virtual void main_loop(){};

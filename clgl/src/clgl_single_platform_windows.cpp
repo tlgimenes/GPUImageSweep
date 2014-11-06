@@ -29,8 +29,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CLGLSinglePlatformWindows::CLGLSinglePlatformWindows(WindowManager& manager, cl::Platform& plat) :
-    CLGLSinglePlatform(manager, plat)
+CLGLSinglePlatformWindows::CLGLSinglePlatformWindows(cl::Platform& plat) :
+    CLGLSinglePlatform(plat)
 {
     // Init OpenCL OpenGL Shared Context //
     this->clgl_create_context();

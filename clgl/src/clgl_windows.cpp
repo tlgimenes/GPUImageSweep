@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CLGLWindows::CLGLWindows(WindowManager& manager) : CLGL()
+CLGLWindows::CLGLWindows(WindowManager& manager) : CLGL(manager)
 {
     try {
         std::vector<cl::Platform> platforms;
@@ -24,7 +24,7 @@ CLGLWindows::CLGLWindows(WindowManager& manager) : CLGL()
 
         for(int i=0; i < platforms.size(); i++)
         {
-            this->_platforms->push_back(CLGLSinglePlatformWindows(manager, platforms[i]));
+            this->_platforms->push_back(CLGLSinglePlatformWindows(platforms[i]));
         }
     }
     catch(const cl::Error& error) 

@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #include "image_acquirer.hpp"
+#include "clgl_image.hpp"
 #include "window_manager.hpp"
 #include "clgl.hpp"
 
@@ -29,8 +30,10 @@ class MainWindowGlut
 {
     public:
         static WindowManager* wmanager;
-        static ImageAcquirer* img;
+        static CLGLImage *img1, *img2;
         static CLGL* clgl;
+
+        static int height,width;
 
         static bool showInfo;
         static int play;

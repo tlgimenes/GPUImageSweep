@@ -43,7 +43,6 @@ class CLGL
         cl_device_type _dev;
 
     public: 
-        explicit CLGL();
         explicit CLGL(WindowManager& manager);
         explicit CLGL(const CLGL& same);
 

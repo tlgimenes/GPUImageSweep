@@ -30,8 +30,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CLGLSinglePlatformLinux::CLGLSinglePlatformLinux(WindowManager& manager, cl::Platform& platform) :
-    CLGLSinglePlatform(manager, platform)
+CLGLSinglePlatformLinux::CLGLSinglePlatformLinux(cl::Platform& platform) :
+    CLGLSinglePlatform(platform)
 {
     // Init OpenCL OpenGL Shared Context //
     this->clgl_create_context();

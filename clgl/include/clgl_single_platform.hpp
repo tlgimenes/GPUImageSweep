@@ -48,7 +48,6 @@ class CLGLSinglePlatform
         // -------------------- //
         // GL related variables //
         // -------------------- // 
-        std::shared_ptr<WindowManager> _window_manager;
         std::shared_ptr<std::vector<GLuint>> _vbos;
         std::shared_ptr<std::vector<GLuint>> _textures;
 
@@ -83,7 +82,7 @@ class CLGLSinglePlatform
         virtual void clgl_create_command_queue(){};
 
     public: 
-        explicit CLGLSinglePlatform(WindowManager& manager, cl::Platform& platform);
+        explicit CLGLSinglePlatform(cl::Platform& platform);
         explicit CLGLSinglePlatform(const CLGLSinglePlatform& same);
 
         //Get all the information from device

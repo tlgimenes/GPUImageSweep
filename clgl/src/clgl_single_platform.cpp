@@ -20,8 +20,7 @@
 /**
  * Gets the platforms and devices associated 
  * */
-CLGLSinglePlatform::CLGLSinglePlatform(WindowManager& manager, cl::Platform& platform) :
-    _window_manager(&manager),
+CLGLSinglePlatform::CLGLSinglePlatform(cl::Platform& platform) :
     _vbos(new std::vector<GLuint>()),
     _textures(new std::vector<GLuint>()),
     _platform(&platform),
@@ -49,7 +48,6 @@ CLGLSinglePlatform::CLGLSinglePlatform(WindowManager& manager, cl::Platform& pla
  *  Constructor for using the shared pointer facility 
  * */
 CLGLSinglePlatform::CLGLSinglePlatform(const CLGLSinglePlatform& same) :
-    _window_manager(same._window_manager),
     _vbos(same._vbos),
     _textures(same._textures),
     _platform(same._platform),
@@ -224,7 +222,7 @@ int CLGLSinglePlatform::clgl_load_texture_data_to_device(const size_t width, con
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, 
                 GL_UNSIGNED_BYTE, hostMemory);
 
-        glBindBuffer(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
         glFinish();
 
         // Create buffer from OpenGL Texture

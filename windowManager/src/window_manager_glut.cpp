@@ -29,20 +29,31 @@ WindowManagerGlut::WindowManagerGlut(int argc, char* argv[], std::string window_
         ImageAcquirer& img) :
     WindowManager()
 {
-    int window_width = img.width();
-    int window_height = img.height();
+    _window_width = img.width();
+    _window_height = img.height();
 
+    _window_name = window_name;
+
+    _argc = argc;
+
+    _argv = argv;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+void WindowManagerGlut::init()
+{
     /* Init glut and glew */
-    glutInit(&argc, argv);
+    glutInit(&_argc, _argv);
 
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-    glutInitWindowSize(window_width, window_height);
+    glutInitWindowSize(_window_width, _window_height);
 
-    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 -window_width /2, 
-            glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
+    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 -_window_width /2, 
+            glutGet(GLUT_SCREEN_HEIGHT)/2 - _window_height/2);
 
-    this->_windowID = glutCreateWindow(window_name.c_str());
+    this->_windowID = glutCreateWindow(_window_name.c_str());
 
     glewInit();
 }

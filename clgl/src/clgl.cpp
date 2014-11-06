@@ -23,34 +23,12 @@
 /**
  * Gets the platforms and devices associated 
  * */
-CLGL::CLGL() :
-    _platforms(new std::vector<CLGLSinglePlatform>()),
-    _map_ker_plat_id(new std::map<int,int>()),
-    _dev(CL_DEVICE_TYPE_DEFAULT)
-{
-    /* Nothing to do here */
-}
-
 CLGL::CLGL(WindowManager& manager) :
     _platforms(new std::vector<CLGLSinglePlatform>()),
     _map_ker_plat_id(new std::map<int,int>()),
     _dev(CL_DEVICE_TYPE_DEFAULT)
 {
-    try {
-        std::vector<cl::Platform> platforms;
-        // Get the Platforms //
-        cl::Platform::get(&platforms);
-
-        for(int i=0; i < platforms.size(); i++)
-        {
-            this->_platforms->push_back(CLGLSinglePlatform(manager, platforms[i]));
-        }
-    }
-    catch(const cl::Error& error) 
-    {
-        std::cout << error.what() << ' ' << CLGLError::to_str(error.err()) << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    manager.init();
 }
 
 CLGL::CLGL(const CLGL& same) :

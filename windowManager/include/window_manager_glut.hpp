@@ -25,13 +25,21 @@
 class WindowManagerGlut : public WindowManager
 {
     private:
-        int _w_height, _w_width;
+        int _window_height, _window_width;
+
+        std::string _window_name;
+
+        int _argc;
+
+        char** _argv;
 
     public:
-        /**
-         * Inits glut and glew
-         * */
         WindowManagerGlut(int argc, char* argv[], std::string window_name, ImageAcquirer& img);
+ 
+        /** 
+         * Init Glut
+         * */
+        void init();
 
         /**
          * Glut's main loop
