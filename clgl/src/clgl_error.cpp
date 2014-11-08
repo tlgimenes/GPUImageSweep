@@ -44,6 +44,14 @@ void __clgl_assert(int err, const char* file, int line)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+void __clgl_mem_debug_info(float size, const char*file, int line)
+{
+    std::cout << file << ":" << line << " ";
+    std::cout << size << " MB where pushed into the device" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 std::string CLGLError::to_str(GLenum err)
 {
     switch(err) 

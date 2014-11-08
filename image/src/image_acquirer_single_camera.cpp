@@ -16,20 +16,28 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
-    _cap(new cv::VideoCapture(cap))
+ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap, std::string default_path) :
+    _cap(new cv::VideoCapture(cap)),
+    _frame(new cv::Mat()),
+    _webcam_mode(true),
+    _default_path(default_path)
 {
-    cv::Mat frame0;
+    if(!_cap->isOpened()) // If no camera is available
+    {
+        _webcam_mode = false;
+        *_frame = cv::imread(_default_path);
+    }
+    else {  // else use the current frame
+        *_cap >> *_frame;
+    }
 
-    *_cap >> frame0;
-
-    _width = frame0.cols;
-    _height = frame0.rows;
+    _width = _frame->cols;
+    _height = _frame->rows;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
  
- std::vector<struct point3D<GLfloat>>& ImageAcquirerSingleCamera::vertex_coord()
+ std::vector<struct point4D<GLfloat>>& ImageAcquirerSingleCamera::vertex_coord()
 {
     float max = std::max(_width, _height);
     GLfloat x,y,z;
@@ -44,7 +52,7 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
             y = GLfloat(i-_height/2)/max;
             z = GLfloat(0.0);
                     
-            _vertex_coord.push_back(point3D<GLfloat>(x,y,z));
+            _vertex_coord.push_back(point4D<GLfloat>(x,y,z,1));
         }
     }
 
@@ -53,12 +61,12 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
- std::vector<struct point3D<GLubyte>>& ImageAcquirerSingleCamera::vertex_color()
+ std::vector<struct point4D<GLubyte>>& ImageAcquirerSingleCamera::vertex_color()
 {
-    cv::Mat frame;
     cv::Vec3b pixel;
 
-    *_cap >> frame;
+    if(_webcam_mode)
+        *_cap >> *_frame;
  
     _vertex_color.clear();
 
@@ -66,8 +74,8 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
     {
         for(int j=_width-1; j >= 0; j--)
         {
-            pixel = frame.at<cv::Vec3b>(i,j);
-            _vertex_color.push_back(point3D<GLubyte>(pixel[2], pixel[1], pixel[0]));
+            pixel = _frame->at<cv::Vec3b>(i,j);
+            _vertex_color.push_back(point4D<GLubyte>(pixel[2], pixel[1], pixel[0], 255));
         }
     }
 
@@ -102,11 +110,10 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
 
  cv::Mat ImageAcquirerSingleCamera::img()
 {
-    cv::Mat frame;
+    if(_webcam_mode)
+        *_cap >> *_frame;
 
-    *_cap >> frame;
-
-    return frame;
+    return *_frame;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -125,3 +132,41 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap) :
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+bool ImageAcquirerSingleCamera::webcam_mode()
+{
+    return _webcam_mode;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+bool ImageAcquirerSingleCamera::set_webcam_mode(bool mode)
+{
+    assert(mode != _webcam_mode);
+    bool suc = true;
+
+    if(mode == false)
+    {
+        _cap->release();
+        *_frame = cv::imread(_default_path);
+        _webcam_mode = false;
+        _width = _frame->cols;
+        _height = _frame->rows;
+    }
+    else {
+        _cap->open(_cap_id);
+        _webcam_mode = true;
+
+        if(!_cap->isOpened())
+        {
+            *_frame = cv::imread(_default_path);
+            _webcam_mode = false;
+            suc = false;
+        }
+        _width = _frame->cols;
+        _height = _frame->rows;
+    }
+
+    return suc;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////

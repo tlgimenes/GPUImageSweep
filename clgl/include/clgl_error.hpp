@@ -30,8 +30,10 @@
 
 #ifdef NDEBUG
 # define clgl_assert(EX)
+# define clgl_mem_debug_info(SIZE);
 #else 
 # define clgl_assert(EX) __clgl_assert(EX, __FILE__, __LINE__)
+# define clgl_mem_debug_info(SIZE) __clgl_mem_debug_info(SIZE, __FILE__, __LINE__)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +49,8 @@ class CLGLError
 
 void __clgl_assert(GLenum err, const char* file, int line);
 void __clgl_assert(int err, const char* file, int line);
+
+void __clgl_mem_debug_info(float size, const char*file, int line);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

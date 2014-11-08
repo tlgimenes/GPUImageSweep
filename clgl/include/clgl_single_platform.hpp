@@ -42,6 +42,19 @@ typedef unsigned char uchar;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+enum CLGLenum_t
+{
+    CLGL_CL,
+    CLGL_VBO,
+    CLGL_TEXTURE,
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+typedef enum CLGLenum_t CLGLenum;
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 class CLGLSinglePlatform
 {
     protected:
@@ -70,8 +83,11 @@ class CLGLSinglePlatform
         // All kernels are stored here
         std::shared_ptr<std::vector<cl::Kernel>> _kernel;
 
-        // Maps the kernel_id to each device_id;
+        // Maps the kernel_id to each program_id;
         std::shared_ptr<std::map<int,int>> _map_ker_prog_id;
+
+        // Maps the program_id to each device_id
+        std::shared_ptr<std::map<int, int>> _map_prog_dev_id;
 
         // ----------------- //
         // Protected Methods //
@@ -114,14 +130,15 @@ class CLGLSinglePlatform
                 const int bytes_size, void * data, int device_id = 0);
 
 
-        //Set the kernel arguments for data on device
+        //Set the kernel arguments for data on Device
+        template <CLGLenum type>
         void clgl_set_arg(const int argNum, const int buffer_id = 0, const int kernel_id = 0);
         //Set the simple kernel arguments
         void clgl_set_arg(const int argNum, const size_t bytesSize, void* buffer,
                 const int kernel_id);
 
         //Runs the kernel
-        void clgl_run_kernel(const int kernel_id = 0, const int device_id = 1, const int numThreads = 1);
+        void clgl_run_kernel(const int kernel_id = 0, const int numThreads = 1);
 
         //Get Private stuff
         const std::shared_ptr<std::vector<cl::Device>>& devices();
@@ -177,6 +194,8 @@ int CLGLSinglePlatform::clgl_load_vbo_data_to_device(const size_t bufferBytesSiz
     {
         clgl_assert(error.err());
     }
+
+    clgl_mem_debug_info(bufferBytesSize/1024./1024.);
 
     return vbo_buffer_id;
 }

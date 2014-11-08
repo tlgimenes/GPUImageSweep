@@ -20,6 +20,9 @@
 #include <opencv2/opencv.hpp>
 #include <memory>
 
+#define DEFAULT_PATH_IMAGE_1 "../samples/face00R.tif"
+#define DEFAULT_PATH_IMAGE_2 "../samples/face01R.tif"
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 class ImageAcquirer
@@ -29,25 +32,13 @@ class ImageAcquirer
         ImageAcquirerSingleCamera _img1;
         ImageAcquirerSingleCamera _img2;
 
+        cv::Mat _K2, _Kref, _R2, _T2;
+
     public:
         ImageAcquirer();
 
-        cv::Mat img1();
-        cv::Mat img2();
-
         ImageAcquirerSingleCamera& acquirer1();
         ImageAcquirerSingleCamera& acquirer2();
-
-        std::vector<struct point3D<GLfloat>>& vertex_coord1();
-        std::vector<struct point3D<GLubyte>>& vertex_color1();
-        std::vector<struct point3D<GLuint>> & vertex_index1();
- 
-        std::vector<struct point3D<GLfloat>>& vertex_coord2();
-        std::vector<struct point3D<GLubyte>>& vertex_color2();
-        std::vector<struct point3D<GLuint>> & vertex_index2();
-
-        int width();
-        int height();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

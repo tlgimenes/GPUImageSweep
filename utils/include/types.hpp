@@ -22,10 +22,23 @@ template <typename T>
 struct point3D
 {
     point3D(T x, T y, T z) : _x(x), _y(y), _z(z) {}
-    T x() { return _x; }
-    T y() { return _y; }
-    T z() { return _z; }
+    inline T x() { return _x; }
+    inline T y() { return _y; }
+    inline T z() { return _z; }
     T _x, _y, _z;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct point4D
+{
+    point4D(T x, T y, T z, T w) : _x(x), _y(y), _z(z), _w(w) {}
+    inline T x() { return _x; }
+    inline T y() { return _y; }
+    inline T z() { return _z; }
+    inline T w() { return _w; }
+    T _x, _y, _z, _w;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

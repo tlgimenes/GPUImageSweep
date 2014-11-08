@@ -6,8 +6,8 @@ project(GPUPlanSweep)
 
 # Internal files
 set(SRC main.cpp)
-set(INC clgl/include image/include windowManager/include utils/include)
-set(SUBFOLDERS clgl image windowManager utils)
+set(INC clgl/include image/include windowManager/include utils/include planeSweep/include externals/)
+set(SUBFOLDERS clgl image windowManager utils planeSweep)
 set(C_FLAGS -std=c++11)
 
 # Compiler flags
@@ -46,5 +46,6 @@ target_link_libraries(gpuplansweep
                       image
                       windowManager
                       utils
+                      planeSweep
                      )
 

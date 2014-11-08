@@ -32,7 +32,8 @@ CLGLSinglePlatform::CLGLSinglePlatform(cl::Platform& platform) :
     _bufferGL(new std::vector<cl::Memory>()),
     _buffer(new std::vector<cl::Buffer>()),
     _kernel(new std::vector<cl::Kernel>()),
-    _map_ker_prog_id(new std::map<int,int>())
+    _map_ker_prog_id(new std::map<int,int>()),
+    _map_prog_dev_id(new std::map<int,int>())
 {
     try {
         // Get the Devices for each platform//
@@ -59,7 +60,8 @@ CLGLSinglePlatform::CLGLSinglePlatform(const CLGLSinglePlatform& same) :
     _bufferGL(same._bufferGL),
     _buffer(same._buffer),
     _kernel(same._kernel),
-    _map_ker_prog_id(same._map_ker_prog_id)   
+    _map_ker_prog_id(same._map_ker_prog_id),
+    _map_prog_dev_id(same._map_prog_dev_id)
 {
     /* Nothing to do here ! */
 }
@@ -92,22 +94,30 @@ std::string CLGLSinglePlatform::clgl_get_devices_info(cl_device_info name, int d
 int CLGLSinglePlatform::clgl_build_program_source(const std::string& programName, 
         const std::string& compilerFlags, int device_id)
 {
-    std::fstream programFile; 
+    std::ifstream programFile; 
     std::stringstream programStr;
+    std::string str;
 
     try {
         programFile.open(programName);
-        programStr << programFile;
- 
-        // Builds the Program Source
-        cl::Program::Sources source(1, std::make_pair(programStr.str().c_str(),
-                    programStr.str().size()));
-        this->_programs->push_back(cl::Program((*this->_contexts)[device_id], source));
-        this->_programs->back().build((*this->_devices), compilerFlags.c_str());
+        if(programFile.is_open())
+        {
+            programStr << programFile.rdbuf();
+            str = programStr.str();
+
+            // Builds the Program Source 
+            cl::Program::Sources source(1, std::make_pair(str.c_str(),
+                        str.size()));
+            this->_programs->push_back(cl::Program((*this->_contexts)[device_id], source));
+            this->_programs->back().build((*this->_devices), compilerFlags.c_str());
+        }
+        else {
+            throw cl::Error(CL_INVALID_BUILD_OPTIONS, "File not found oppened/found !");
+        }
     }
     catch(const cl::Error& error )
     {
-        if(!strcmp(error.what(), "clBuildProgram")){ // If Compilation Errors print then
+        if(!strcmp(error.what(), "clBuildProgram")) { // If Compilation Errors print then
             std::string log;
             (*this->_programs)[device_id].getBuildInfo((*this->_devices)[device_id], 
                     CL_PROGRAM_BUILD_LOG, &log);
@@ -119,6 +129,8 @@ int CLGLSinglePlatform::clgl_build_program_source(const std::string& programName
     {
         std::cout << error.what() << std::endl;
     }
+    // Maps the program_id
+    this->_map_prog_dev_id->insert(std::pair<int, int>(this->_programs->size()-1, device_id));
 
     return this->_programs->size()-1;
 }
@@ -173,6 +185,8 @@ int CLGLSinglePlatform::clgl_load_data_to_device(const cl_bool blocking,
         clgl_assert(error.err());
     }
 
+    clgl_mem_debug_info(bufferBytesSize/1024./1024.);
+    
     return buffer_id;  
 }
 
@@ -285,9 +299,20 @@ void CLGLSinglePlatform::clgl_get_data_from_device(const int buffer_id, const cl
 /*
  * Set Arguments to kernel
  */
-void CLGLSinglePlatform::clgl_set_arg(const int argNum, const int buffer_id, const int kernel_id)
+template <>
+void CLGLSinglePlatform::clgl_set_arg<CLGL_VBO>(const int argNum, const int buffer_id, const int kernel_id)
 {
-    _kernel->at(kernel_id).setArg(argNum, _bufferGL->at(buffer_id));
+    _kernel->at(kernel_id).setArg(argNum, _bufferGL->at(buffer_id-1));
+
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+template <>
+void CLGLSinglePlatform::clgl_set_arg<CLGL_CL>(const int argNum, const int buffer_id, const int kernel_id)
+{
+    _kernel->at(kernel_id).setArg(argNum, _buffer->at(buffer_id));
 
     return;
 }
@@ -310,10 +335,11 @@ void CLGLSinglePlatform::clgl_set_arg(const int argNum, const size_t bytesSize, 
 /*
  * Run the kernel
  */
-void CLGLSinglePlatform::clgl_run_kernel(const int kernel_id, 
-        const int device_id, const int numThreads)
+void CLGLSinglePlatform::clgl_run_kernel(const int kernel_id, const int numThreads)
 {
     try{
+        int device_id = _map_prog_dev_id->at(_map_ker_prog_id->at(kernel_id));
+
         // Wait for OpenGL finish what it is doing
         glFinish();
 

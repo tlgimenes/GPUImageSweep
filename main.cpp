@@ -38,11 +38,6 @@ int main(int argc, char *argv[])
 #endif
 
     // Prints platforms and devices details
-    std::cout << clgl.platforms()->size() << " platform(s) found !" << std::endl;
-    for(int i=0; i < clgl.platforms()->size(); i++)
-    {
-        std::cout << clgl.platforms()->at(i).devices()->size() << " device(s) found for platform " << i << " !" << std::endl;
-    }
     std::cout << clgl << std::endl;
 
     MainWindowGlut::start(img, clgl, wmanager);

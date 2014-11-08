@@ -11,6 +11,7 @@
 
 #include "main_window_glut.hpp"
 #include "image_acquirer_single_camera.hpp"
+#include "homography.hpp"
 
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -21,6 +22,7 @@
 WindowManager* MainWindowGlut::wmanager = NULL;
 CLGLImage* MainWindowGlut::img1 = NULL;
 CLGLImage* MainWindowGlut::img2 = NULL;
+PlaneSweep* MainWindowGlut::planeSweep = NULL;
 CLGL* MainWindowGlut::clgl = NULL;
 
 int MainWindowGlut::height = 0;
@@ -54,13 +56,19 @@ float MainWindowGlut::scale[3] = {1.7, 1.7, 0.3};
 void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager)
 {
     /* Sets objects */
-    MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
-    MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
     MainWindowGlut::clgl= &clgl;
     MainWindowGlut::wmanager = &wmanager;
 
-    height = img.height();
-    width  = img.width();
+    MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
+    MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
+    cv::Mat id = cv::Mat::eye(3, 3, CV_32F);
+    cv::Mat tr = cv::Mat::eye(3, 1, CV_32F);
+    Homography H(id, id, id, tr, 1, 10, 10, *MainWindowGlut::clgl);
+    MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, H, 
+            *MainWindowGlut::img1, *MainWindowGlut::img2);
+
+    height = img.acquirer1().height();
+    width  = img.acquirer1().width();
 
     /* Connect callbacks */
     // Idle function callback
@@ -73,7 +81,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glutMotionFunc(MainWindowGlut::glutMotion_cb);
 
     glShadeModel(GL_SMOOTH);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glDisable(GL_DEPTH_TEST);
 
     // viewport
@@ -104,7 +112,9 @@ void MainWindowGlut::glutIdleFunc_cb()
 {
     MainWindowGlut::calculateFPS();
 
-    MainWindowGlut::img1->update();
+   // MainWindowGlut::img1->update();
+
+    //MainWindowGlut::planeSweep->run_plane_sweep_kernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -141,12 +151,12 @@ void MainWindowGlut::glutDisplayFunc_cb()
 
     // Binds the vertex VBO's
     glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_coord_vbo_id());
-    glVertexPointer(3, GL_FLOAT, sizeof(point3D<GLfloat>), 0);
+    glVertexPointer(3, GL_FLOAT, sizeof(point4D<GLfloat>), 0);
     clgl_assert(glGetError());
 
     // VBO Color must be inserted in last place
     glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_color_vbo_id());
-    glColorPointer(3, GL_UNSIGNED_BYTE, sizeof(point3D<GLubyte>), 0);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(point4D<GLubyte>), 0);
     clgl_assert(glGetError());
 
     // Indexed rendering for better performance !
@@ -312,6 +322,9 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
         case 'q':    // q (or escape) quits
             // Cleanup up and QUIT
             exit(EXIT_SUCCESS);
+            break;
+        case 'R': case 'r':
+            MainWindowGlut::planeSweep->run_plane_sweep_kernel();
             break;
     }
 }

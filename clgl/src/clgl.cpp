@@ -78,7 +78,7 @@ int CLGL::clgl_build_kernel(const std::string& kernelFunctionName,
     int kernel_id = this->_platforms->at(platform_id).clgl_build_kernel(kernelFunctionName,
             device_id);
 
-    this->_map_ker_plat_id->insert(std::pair<int,int>(kernel_id,device_id));
+    this->_map_ker_plat_id->insert(std::pair<int,int>(kernel_id, device_id));
 
     return kernel_id;
 }
@@ -145,26 +145,6 @@ void CLGL::clgl_get_data_from_device(const int buffer_id, const cl_bool blocking
 
     return this->_platforms->at(platform_id).clgl_get_data_from_device(buffer_id, blocking,
             bytes_size, data, device_id);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-/*
- * Set Arguments to kernel
- */
-void CLGL::clgl_set_arg(const int argNum, const int buffer_id, const int kernel_id)
-{
-    try {
-        int platform_id = this->_map_ker_plat_id->at(kernel_id);
-        assert(platform_id < this->_platforms->size());
-
-        this->_platforms->at(platform_id).clgl_set_arg(argNum, buffer_id, kernel_id);
-    }
-    catch(const std::out_of_range& error)
-    {
-        std::cout << error.what() << std::endl;
-        exit(EXIT_FAILURE);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

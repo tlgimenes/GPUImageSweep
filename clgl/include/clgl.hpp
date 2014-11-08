@@ -80,6 +80,7 @@ class CLGL
                 int platform_id = 0, int device_id = 0);
 
         //Set the kernel arguments for data on device
+        template <CLGLenum type>
         void clgl_set_arg(const int argNum, const int buffer_id, const int kernel_id);
         //Set the simple kernel arguments
         void clgl_set_arg(const int argNum, const size_t bytesSize, void* buffer, const int kernel_id);
@@ -98,6 +99,27 @@ class CLGL
 
         int clgl_get_vbo_bytes_size(int vbo_id, int platform_id);
 };
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Set Arguments to kernel
+ */
+template <CLGLenum type>
+void CLGL::clgl_set_arg(const int argNum, const int buffer_id, const int kernel_id)
+{
+    try {
+        int platform_id = this->_map_ker_plat_id->at(kernel_id);
+        assert(platform_id < this->_platforms->size());
+
+        this->_platforms->at(platform_id).clgl_set_arg<type>(argNum, buffer_id, kernel_id);
+    }
+    catch(const std::out_of_range& error)
+    {
+        std::cout << error.what() << " in " << __FILE__ << ":" << __LINE__ << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

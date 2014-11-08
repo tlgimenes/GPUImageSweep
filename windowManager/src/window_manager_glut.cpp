@@ -29,8 +29,8 @@ WindowManagerGlut::WindowManagerGlut(int argc, char* argv[], std::string window_
         ImageAcquirer& img) :
     WindowManager()
 {
-    _window_width = img.width();
-    _window_height = img.height();
+    _window_width = img.acquirer1().width();
+    _window_height = img.acquirer1().height();
 
     _window_name = window_name;
 

@@ -53,6 +53,12 @@ class CLGLImage
          * Gets the number of indexing elements 
          * */
         int num_index_elements();
+
+        /**
+         * Height and width of the image
+         * */
+        int width();
+        int height();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

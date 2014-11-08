@@ -18,6 +18,7 @@
 #include "clgl_image.hpp"
 #include "window_manager.hpp"
 #include "clgl.hpp"
+#include "plane_sweep.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,6 +32,7 @@ class MainWindowGlut
     public:
         static WindowManager* wmanager;
         static CLGLImage *img1, *img2;
+        static PlaneSweep* planeSweep;
         static CLGL* clgl;
 
         static int height,width;
