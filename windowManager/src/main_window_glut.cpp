@@ -11,9 +11,10 @@
 
 #include "main_window_glut.hpp"
 #include "image_acquirer_single_camera.hpp"
-#include "homography.hpp"
+#include "clgl_projection.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -22,6 +23,7 @@
 WindowManager* MainWindowGlut::wmanager = NULL;
 CLGLImage* MainWindowGlut::img1 = NULL;
 CLGLImage* MainWindowGlut::img2 = NULL;
+CLGLProjection* MainWindowGlut::proj = NULL;
 PlaneSweep* MainWindowGlut::planeSweep = NULL;
 CLGL* MainWindowGlut::clgl = NULL;
 
@@ -34,7 +36,7 @@ bool MainWindowGlut::showInfo = true;
 // FPS counter
 float MainWindowGlut::fps = 0.0;
 
-// String parameters
+// String parametert_length 
 int MainWindowGlut::fontSize = 30;
 float MainWindowGlut::stringColor[4] = {1.0,  1.0, 1.0, 1.0};
 void* MainWindowGlut::font = GLUT_BITMAP_TIMES_ROMAN_24;
@@ -61,10 +63,16 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
 
     MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
     MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
-    cv::Mat id = cv::Mat::eye(3, 3, CV_32F);
-    cv::Mat tr = cv::Mat::eye(3, 1, CV_32F);
-    Homography H(id, id, id, tr, 1, 10, 10, *MainWindowGlut::clgl);
-    MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, H, 
+
+    cv::Matx33d A1, A2;
+    cv::Vec3d B1, B2;
+    std::ifstream f1("../samples/face00.txt");
+    std::ifstream f2("../samples/face01.txt");
+    for (int i=0;i<3;i++) f1 >> A1(i,0) >> A1(i,1) >> A1(i,2) >> B1[i]; 
+    for (int i=0;i<3;i++) f2 >> A2(i,0) >> A2(i,1) >> A2(i,2) >> B2[i]; 
+
+    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 150, 360, 600, *MainWindowGlut::clgl);
+    MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, *MainWindowGlut::proj, 
             *MainWindowGlut::img1, *MainWindowGlut::img2);
 
     height = img.acquirer1().height();
@@ -112,9 +120,10 @@ void MainWindowGlut::glutIdleFunc_cb()
 {
     MainWindowGlut::calculateFPS();
 
-   // MainWindowGlut::img1->update();
+//    MainWindowGlut::img1->update();
 
-    //MainWindowGlut::planeSweep->run_plane_sweep_kernel();
+//    MainWindowGlut::planeSweep->run_compute_plane_kernel();
+//    MainWindowGlut::planeSweep->run_project_plane_kernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +333,18 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
             exit(EXIT_SUCCESS);
             break;
         case 'R': case 'r':
-            MainWindowGlut::planeSweep->run_plane_sweep_kernel();
+            MainWindowGlut::planeSweep->run_compute_plane_kernel();
+            MainWindowGlut::planeSweep->run_project_plane_kernel();
+            float * data = new float[30*4];
+            MainWindowGlut::clgl->clgl_get_data_from_device(
+                    MainWindowGlut::proj->buffer_id_homography(), CL_TRUE, 
+                sizeof(point4D<GLfloat>)*30, data);
+
+            for(int i=0; i < 30*4; i++)
+            {
+                std::cout << data[i] << " ";
+            } std::cout << std::endl;
+
             break;
     }
 }

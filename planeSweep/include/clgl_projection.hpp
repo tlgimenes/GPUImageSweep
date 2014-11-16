@@ -1,6 +1,6 @@
 /*
  * =====================================================================================
- *       Filename:  homography.hpp
+ *       Filename:  clgl_projection.hpp
  *    Description:  
  *        Created:  2014-11-06 20:57
  *         Author:  Tiago Lobato Gimenes        (tlgimenes@gmail.com)
@@ -9,8 +9,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef HOMOGRAPHY_HPP
-#define HOMOGRAPHY_HPP
+#ifndef CLGL_HOMOGRAPHY_HPP
+#define CLGL_HOMOGRAPHY_HPP
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -22,18 +22,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-class Homography
+class CLGLProjection
 {
     private:
         /**
          * Matrix for calculating the homography. The names of the variables
          * follows the reference paper
          * */
-        Eigen::Matrix3f _Kref_inv; // The inverse of the reference camera matrix;
-        Eigen::Matrix3f _K2;  // The camera matrix of the second camera
-        Eigen::Matrix3f _R2;  // Rotation of the second camera
-        Eigen::Vector3f _T2;  // Translation of the second camera
-        Eigen::Vector3f _n_k; // Normal vector of the planes
+        Eigen::Matrix3f _A1, _A2;   // cameraMatrix * rotation
+        Eigen::Vector3f _B1, _B2;   // cameraMatrix * translation
+        Eigen::Vector3f _C1, _C2;   // center of the camera
+        Eigen::Vector3f _n; // normal of the projection plane
 
         /**
          * Minimum and maximum distance for the planes
@@ -41,9 +40,10 @@ class Homography
         float _d_min, _d_max;
 
         /**
-         * Buffer id of the homography matrix loadded in GPU memory
+         * Buffer id of matrices loadded in GPU memory
          * */
-        int _buffer_id;
+        int _buffer_id_homography; // buffer id of homography matrices Image1 -> Image2
+        int _buffer_id_projection; // buffer id of projection matrices Image1 -> 3D Object
 
         /**
          * Number of planes of the buffer loadded in GPU memory
@@ -61,19 +61,30 @@ class Homography
          *  */
         void homography_for_dist(float d_k, std::vector<point4D<GLfloat>>& H_k);
 
+        /**
+         * Calculates the projection matrix (3x4) for the distance d_k 
+         * */
+        void projection_for_dist(float d_k, std::vector<point4D<GLfloat>>& P_k);
+
     public:
         /** 
          * Calculates all homography matrices from distance d_min and d_max,
          * store all matrices in a buffer and load it to the GPU
          * */
-        Homography(cv::Mat& K2, cv::Mat& Kref, cv::Mat& R2, cv::Mat& T2, 
+        CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, cv::Vec3d& B2, 
                 float d_min, float d_max, int n_planes, CLGL& clgl);
 
         /**
          * Buffer id of the vbo representing the homography matrix 
-         * int the GPU
+         * in the GPU
          * */
-        int buffer_id();
+        int buffer_id_homography();
+
+        /**
+         * Buffer id of the vbo representing the projection matrix 
+         * in the GPU 
+         * */
+        int buffer_id_projection();
 
         /**
          * Number of planes (number of homography matrices) in the 
@@ -94,7 +105,7 @@ class Homography
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#endif /* !HOMOGRAPHY_HPP */
+#endif /* !CLGL_HOMOGRAPHY_HPP */
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

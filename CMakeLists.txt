@@ -49,3 +49,13 @@ target_link_libraries(gpuplansweep
                       planeSweep
                      )
 
+project(cpuPlanSweep)
+set(${CMAKE_PROJECT_NAME}_SRC mainCPU.cpp)
+
+include_directories(${PROJECT_SOURCE_DIR}/cpu/include)
+subdirs(${PROJECT_SOURCE_DIR}/cpu)
+
+add_executable(${CMAKE_PROJECT_NAME} ${${CMAKE_PROJECT_NAME}_SRC})
+
+target_link_libraries(${CMAKE_PROJECT_NAME} cpu)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS})

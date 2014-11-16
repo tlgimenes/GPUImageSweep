@@ -33,7 +33,7 @@ CLGLImage::CLGLImage(CLGL& clgl, ImageAcquirerSingleCamera& img) :
         std::cout << "Pushing " << color.size() << " vertex colors to device" << std::endl;
         _vertex_color_vbo_id = clgl.clgl_load_vbo_data_to_device<GL_ARRAY_BUFFER>(
                 sizeof(point4D<GLubyte>)*color.size(),
-                (const void*)color.data(), CL_MEM_READ_WRITE);
+                (const void*)color.data(), CL_MEM_READ_ONLY);
 
         _vertex_index_vbo_id = clgl.clgl_load_vbo_data_to_device<GL_ELEMENT_ARRAY_BUFFER>(
                 sizeof(point3D<GLuint>)*index.size(), 
