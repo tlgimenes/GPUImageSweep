@@ -56,7 +56,7 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
     for(int i=0; i < H.size(); i+=3){
         std::cout << "[[" << H[i].x() << "," << H[i].y() << "," << H[i].z() << "," << H[i].w() << "]," << std::endl;
         std::cout << " [" << H[i+1].x() << "," << H[i+1].y() << "," << H[i+1].z() << "," << H[i+1].w() << "]," << std::endl;
-        std::cout << " [" << H[i+2].x() << "," << H[i+2].y() << "," << H[i+2].z() << "," << H[i+2].w() << "]]" << std::endl << std::endl;
+        std::cout << " [" << H[i+2].x() << "," << H[i+2].y() << "," << H[i+2].z() << "," << H[i+2].w() << "]]" << std::endl;
     }std::cout << std::endl;
 
     std::cout << "pushing " << H.size() << " matrix lines to the GPU" << std::endl;
@@ -75,7 +75,7 @@ void CLGLProjection::projection_for_dist(float d_k, std::vector<point4D<GLfloat>
 
 void CLGLProjection::homography_for_dist(float d_k, std::vector<point4D<GLfloat>>& H_k)
 {
-    double tmp = _n.transpose() * (_A1.inverse() * _B1 + _C1);
+    double tmp = _n.transpose() * (_A1.inverse() * _B1  + _C1);
     double lambda = tmp + d_k;
        
     Eigen::Matrix3f H;

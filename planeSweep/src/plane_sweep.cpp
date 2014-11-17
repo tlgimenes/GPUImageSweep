@@ -33,9 +33,9 @@ PlaneSweep::PlaneSweep(CLGL& clgl, CLGLProjection& h, CLGLImage& img1, CLGLImage
 
     create_plane_index_buffer(img1.height() * img1.width()); // one plane per pixel
 
-    uint n_planes = h.n_planes();
-    uint height = img1.height();
-    uint width = img1.width();
+    int n_planes = h.n_planes();
+    int height = img1.height();
+    int width = img1.width();
     float d_min = h.d_min();
 
     std::cout << "n_planes " << n_planes << std::endl;
@@ -45,10 +45,11 @@ PlaneSweep::PlaneSweep(CLGL& clgl, CLGLProjection& h, CLGLImage& img1, CLGLImage
     _clgl.clgl_set_arg<CLGL_CL>(0, h.buffer_id_homography(), _compute_plane_kernel_id);
     _clgl.clgl_set_arg<CLGL_VBO>(1, img1.vertex_color_vbo_id(), _compute_plane_kernel_id);
     _clgl.clgl_set_arg<CLGL_VBO>(2, img2.vertex_color_vbo_id(), _compute_plane_kernel_id);
-    _clgl.clgl_set_arg<CLGL_CL>(3, _buffer_id_plane_index, _compute_plane_kernel_id);
-    _clgl.clgl_set_arg(4, sizeof(uint), &n_planes , _compute_plane_kernel_id);
-    _clgl.clgl_set_arg(5, sizeof(uint), &height, _compute_plane_kernel_id);
-    _clgl.clgl_set_arg(6, sizeof(uint), &width , _compute_plane_kernel_id);
+    //_clgl.clgl_set_arg<CLGL_CL>(3, _buffer_id_plane_index, _compute_plane_kernel_id);
+    _clgl.clgl_set_arg<CLGL_VBO>(3, img1.vertex_coord_vbo_id(), _compute_plane_kernel_id);
+    _clgl.clgl_set_arg(4, sizeof(int), &n_planes , _compute_plane_kernel_id);
+    _clgl.clgl_set_arg(5, sizeof(int), &height, _compute_plane_kernel_id);
+    _clgl.clgl_set_arg(6, sizeof(int), &width , _compute_plane_kernel_id);
 
     /*_clgl.clgl_set_arg<CLGL_CL>(0, , _project_plane_kernel_id);
     _clgl.clgl_set_arg<CLGL_VBO>(1, img1.vertex_color_vbo_id(), _project_plane_kernel_id);

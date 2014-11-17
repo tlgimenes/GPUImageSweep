@@ -22,6 +22,8 @@
 
 #define DEFAULT_PATH_IMAGE_1 "../samples/face00R.tif"
 #define DEFAULT_PATH_IMAGE_2 "../samples/face01R.tif"
+//#define DEFAULT_PATH_IMAGE_1 "../samples/tiago1.png"
+//#define DEFAULT_PATH_IMAGE_2 "../samples/tiago2.png"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

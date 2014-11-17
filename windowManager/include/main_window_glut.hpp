@@ -32,6 +32,7 @@ class MainWindowGlut
     public:
         static WindowManager* wmanager;
         static CLGLImage *img1, *img2;
+        static CLGLImage *img; //current image beeing shown
         static CLGLProjection *proj;
         static PlaneSweep* planeSweep;
         static CLGL* clgl;

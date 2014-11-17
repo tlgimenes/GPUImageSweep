@@ -70,9 +70,9 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap, std::string defaul
  
     _vertex_color.clear();
 
-    for(int i=_height-1; i >= 0; i--)
+    for(int i=0; i < _height; i++)
     {
-        for(int j=_width-1; j >= 0; j--)
+        for(int j=0; j < _width; j++)
         {
             pixel = _frame->at<cv::Vec3b>(i,j);
             _vertex_color.push_back(point4D<GLubyte>(pixel[2], pixel[1], pixel[0], 255));
@@ -98,8 +98,8 @@ ImageAcquirerSingleCamera::ImageAcquirerSingleCamera(int cap, std::string defaul
         {
             _vertex_index.push_back(point3D<GLuint>(INDEX(i,j),
                         INDEX(i,j+1),INDEX(i+1,j)));
-            _vertex_index.push_back(point3D<GLuint>(INDEX(i+1,j+1),
-                        INDEX(i+1,j),INDEX(i,j+1)));
+            _vertex_index.push_back(point3D<GLuint>(INDEX(i,j+1),
+                        INDEX(i+1,j),INDEX(i+1,j+1)));
         }
     }
 

@@ -118,7 +118,7 @@ int main( int argc, char** argv )
 
 	//testing
 	int n=4; //ncc parameter
-	double thresh=0.6;
+	double thresh=-1.0;
 	Plane P;
 	//P.d=298;
 	P.normal=D.middleVector();

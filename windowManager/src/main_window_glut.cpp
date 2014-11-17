@@ -23,6 +23,7 @@
 WindowManager* MainWindowGlut::wmanager = NULL;
 CLGLImage* MainWindowGlut::img1 = NULL;
 CLGLImage* MainWindowGlut::img2 = NULL;
+CLGLImage* MainWindowGlut::img = NULL;
 CLGLProjection* MainWindowGlut::proj = NULL;
 PlaneSweep* MainWindowGlut::planeSweep = NULL;
 CLGL* MainWindowGlut::clgl = NULL;
@@ -63,6 +64,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
 
     MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
     MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
+    MainWindowGlut::img = MainWindowGlut::img1;
 
     cv::Matx33d A1, A2;
     cv::Vec3d B1, B2;
@@ -71,7 +73,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     for (int i=0;i<3;i++) f1 >> A1(i,0) >> A1(i,1) >> A1(i,2) >> B1[i]; 
     for (int i=0;i<3;i++) f2 >> A2(i,0) >> A2(i,1) >> A2(i,2) >> B2[i]; 
 
-    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 150, 360, 600, *MainWindowGlut::clgl);
+    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 200, 350, 150, *MainWindowGlut::clgl);
     MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, *MainWindowGlut::proj, 
             *MainWindowGlut::img1, *MainWindowGlut::img2);
 
@@ -89,7 +91,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glutMotionFunc(MainWindowGlut::glutMotion_cb);
 
     glShadeModel(GL_SMOOTH);
-    glClearColor(0, 0, 0, 1.0);
+    glClearColor(0, 0, 60, 1.0);
     glDisable(GL_DEPTH_TEST);
 
     // viewport
@@ -159,21 +161,21 @@ void MainWindowGlut::glutDisplayFunc_cb()
     glDisableClientState(GL_NORMAL_ARRAY);
 
     // Binds the vertex VBO's
-    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_coord_vbo_id());
+    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img->vertex_coord_vbo_id());
     glVertexPointer(3, GL_FLOAT, sizeof(point4D<GLfloat>), 0);
     clgl_assert(glGetError());
 
     // VBO Color must be inserted in last place
-    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img1->vertex_color_vbo_id());
+    glBindBuffer(GL_ARRAY_BUFFER, MainWindowGlut::img->vertex_color_vbo_id());
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(point4D<GLubyte>), 0);
     clgl_assert(glGetError());
 
     // Indexed rendering for better performance !
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img1->vertex_index_vbo_id());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img->vertex_index_vbo_id());
     clgl_assert(glGetError());
 
     // Draw the triangles !
-    glDrawElements (GL_TRIANGLES, MainWindowGlut::img1->num_index_elements(), GL_UNSIGNED_INT, 0);
+    glDrawElements (GL_TRIANGLES, MainWindowGlut::img->num_index_elements(), GL_UNSIGNED_INT, 0);
     clgl_assert(glGetError());
 
     glFlush();
@@ -322,6 +324,16 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
     //this way we can exit the program cleanly
     switch(key)
     {
+        // -------------------- //
+        // Change Figures CASES //
+        // -------------------- //
+        case '1':
+            MainWindowGlut::img = MainWindowGlut::img1;
+            break;
+        case '2':
+            MainWindowGlut::img = MainWindowGlut::img2;
+            break;
+
         // ---------- //
         // QUIT CASES //
         // ---------- //
@@ -334,15 +346,18 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
             break;
         case 'R': case 'r':
             MainWindowGlut::planeSweep->run_compute_plane_kernel();
-            MainWindowGlut::planeSweep->run_project_plane_kernel();
-            float * data = new float[30*4];
+            //MainWindowGlut::planeSweep->run_project_plane_kernel();
+            std::fstream file("homography.txt", std::ios_base::out);
+            float * data = new float[3*MainWindowGlut::proj->n_planes()*4];
             MainWindowGlut::clgl->clgl_get_data_from_device(
                     MainWindowGlut::proj->buffer_id_homography(), CL_TRUE, 
-                sizeof(point4D<GLfloat>)*30, data);
+                sizeof(point4D<GLfloat>)*3*MainWindowGlut::proj->n_planes(), data);
 
-            for(int i=0; i < 30*4; i++)
+            for(int i=0; i < 3*MainWindowGlut::proj->n_planes()*4; i++)
             {
                 std::cout << data[i] << " ";
+                file << data[i] << std::endl;
+                if((i+1)%4 == 0) std::cout << std::endl;
             } std::cout << std::endl;
 
             break;
