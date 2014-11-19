@@ -124,8 +124,8 @@ int main( int argc, char** argv )
 	P.normal=D.middleVector();
 	Mat correlation = Mat::zeros( D.F1.size(), CV_32FC1 );
 	Mat matchPlane=Mat::zeros( D.F1.size(), CV_32FC1 );
-	int minp=200;
-	int maxp=350;
+	int minp=237;
+	int maxp=280;
 	for(int p=minp;p<maxp;p++){
 		P.d=p;
 		cout<<P.d<<endl;

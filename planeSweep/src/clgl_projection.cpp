@@ -26,7 +26,7 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
         float d_min, float d_max, int n_planes, CLGL& clgl) :
     _n_planes(n_planes),
     _d_min(d_min),
-    _delta((d_max-d_min) / n_planes)
+    _delta((d_max-d_min) / (float)n_planes)
 {
     assert(n_planes > 0 && d_min < d_max && d_min > 0.0f);
 
@@ -35,7 +35,7 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
     cv_mat_to_eigen_vector3f(B1, _B1);
     cv_mat_to_eigen_vector3f(B2, _B2);
 
-    _n = (_A1.block(2,0,1,3)).transpose(); // Last line of matrix A1
+    _n = (_A1.block(2,0,1,3)).transpose() + (_A2.block(2,0,1,3)).transpose(); // Last line of matrix A1
     _n.normalize();           // Normalizes the normal
 
     _C1 = -_A1.inverse()*_B1;
@@ -52,12 +52,6 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
         this->homography_for_dist(d_k, H_k);
         H.insert(H.end(), H_k.begin(), H_k.end());
     }
-
-    for(int i=0; i < H.size(); i+=3){
-        std::cout << "[[" << H[i].x() << "," << H[i].y() << "," << H[i].z() << "," << H[i].w() << "]," << std::endl;
-        std::cout << " [" << H[i+1].x() << "," << H[i+1].y() << "," << H[i+1].z() << "," << H[i+1].w() << "]," << std::endl;
-        std::cout << " [" << H[i+2].x() << "," << H[i+2].y() << "," << H[i+2].z() << "," << H[i+2].w() << "]]" << std::endl;
-    }std::cout << std::endl;
 
     std::cout << "pushing " << H.size() << " matrix lines to the GPU" << std::endl;
     _buffer_id_homography = clgl.clgl_load_data_to_device(CL_TRUE, 

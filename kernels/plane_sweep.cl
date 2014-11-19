@@ -184,13 +184,20 @@ __kernel void compute_plane (
                 }
             }
         }
-        model3D[curr].z = -(0.9) * (float)plane_id / (float)homography_size; 
-        if(plane_id == -100)
-            model3D[curr].z = 2; 
+        model3D[curr].z = -(0.5) * (float)plane_id / (float)homography_size; 
+        if(plane_id == -100) {
+            model3D[curr].z = -2;
+            image1[curr].x = 255;
+            image1[curr].y = 0;
+            image1[curr].z = 0;
+        }
     }
     else {
-     //   model3D[curr].z = -homography_size;
-    }
+        model3D[curr].z = -2;
+        image1[curr].x = 0;
+        image1[curr].y = 0;
+        image1[curr].z = 255;
+        }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -22,6 +22,7 @@ CLGLImage::CLGLImage(CLGL& clgl, ImageAcquirerSingleCamera& img) :
     std::vector<point3D<GLuint>>&  index = _img.vertex_index();
 
     _num_index_elements = index.size()*3;
+    _num_vertex = vertx.size();
 
     if(vertx.size() > 0 && color.size() > 0 && index.size() > 0)
     {
@@ -80,6 +81,13 @@ int CLGLImage::vertex_index_vbo_id()
 int CLGLImage::num_index_elements()
 {
     return _num_index_elements;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+int CLGLImage::num_vertex()
+{
+    return _num_vertex;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

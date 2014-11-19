@@ -73,7 +73,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     for (int i=0;i<3;i++) f1 >> A1(i,0) >> A1(i,1) >> A1(i,2) >> B1[i]; 
     for (int i=0;i<3;i++) f2 >> A2(i,0) >> A2(i,1) >> A2(i,2) >> B2[i]; 
 
-    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 200, 350, 150, *MainWindowGlut::clgl);
+    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 237, 280, 40, *MainWindowGlut::clgl);
     MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, *MainWindowGlut::proj, 
             *MainWindowGlut::img1, *MainWindowGlut::img2);
 
@@ -91,7 +91,7 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glutMotionFunc(MainWindowGlut::glutMotion_cb);
 
     glShadeModel(GL_SMOOTH);
-    glClearColor(0, 0, 60, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glDisable(GL_DEPTH_TEST);
 
     // viewport
@@ -171,11 +171,12 @@ void MainWindowGlut::glutDisplayFunc_cb()
     clgl_assert(glGetError());
 
     // Indexed rendering for better performance !
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img->vertex_index_vbo_id());
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img->vertex_index_vbo_id());
     clgl_assert(glGetError());
 
     // Draw the triangles !
-    glDrawElements (GL_TRIANGLES, MainWindowGlut::img->num_index_elements(), GL_UNSIGNED_INT, 0);
+    //glDrawElements (GL_TRIANGLES, MainWindowGlut::img->num_index_elements(), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_POINTS, 0, MainWindowGlut::img->num_vertex());
     clgl_assert(glGetError());
 
     glFlush();
@@ -347,6 +348,7 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
         case 'R': case 'r':
             MainWindowGlut::planeSweep->run_compute_plane_kernel();
             //MainWindowGlut::planeSweep->run_project_plane_kernel();
+#ifndef NDEBUG            
             std::fstream file("homography.txt", std::ios_base::out);
             float * data = new float[3*MainWindowGlut::proj->n_planes()*4];
             MainWindowGlut::clgl->clgl_get_data_from_device(
@@ -359,7 +361,7 @@ void MainWindowGlut::glutKeyboardFunc_cb(unsigned char key, int x, int y)
                 file << data[i] << std::endl;
                 if((i+1)%4 == 0) std::cout << std::endl;
             } std::cout << std::endl;
-
+#endif
             break;
     }
 }

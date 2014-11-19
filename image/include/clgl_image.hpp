@@ -32,6 +32,8 @@ class CLGLImage
 
         int _num_index_elements;
 
+        int _num_vertex;
+
     public:
         CLGLImage(CLGL& clgl, ImageAcquirerSingleCamera& img);
 
@@ -53,6 +55,11 @@ class CLGLImage
          * Gets the number of indexing elements 
          * */
         int num_index_elements();
+
+        /**
+         * Returns the number of vertices
+         * */
+        int num_vertex();
 
         /**
          * Height and width of the image
