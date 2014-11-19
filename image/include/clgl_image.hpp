@@ -24,15 +24,15 @@
 class CLGLImage
 {
     private:
-        int _vertex_coord_vbo_id, _vertex_color_vbo_id, _vertex_index_vbo_id;
+        int _vertex_coord_vbo_id, _vertex_color_vbo_id, _vertex_index_vbo_id; // clgl VBOs IDs
 
-        ImageAcquirerSingleCamera& _img;
+        ImageAcquirerSingleCamera& _img; // Single camera acquirer
 
-        CLGL& _clgl;
+        CLGL& _clgl; // clgl manager
 
-        int _num_index_elements;
+        int _num_index_elements; // number of index elements (number of ints in the vector)
 
-        int _num_vertex;
+        int _num_vertex; // number of vertices in the 3D model
 
     public:
         CLGLImage(CLGL& clgl, ImageAcquirerSingleCamera& img);

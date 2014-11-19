@@ -35,6 +35,9 @@ class ImageAcquirerSingleCamera
 
         int _width, _height;
 
+        /**
+         * 3D model attributes 
+         * */
         std::vector<struct point4D<GLfloat>> _vertex_coord;
         std::vector<struct point4D<GLubyte>> _vertex_color;
         std::vector<struct point3D<GLuint>> _vertex_index;

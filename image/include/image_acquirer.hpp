@@ -22,23 +22,25 @@
 
 #define DEFAULT_PATH_IMAGE_1 "../samples/face00R.tif"
 #define DEFAULT_PATH_IMAGE_2 "../samples/face01R.tif"
-//#define DEFAULT_PATH_IMAGE_1 "../samples/tiago1.png"
-//#define DEFAULT_PATH_IMAGE_2 "../samples/tiago2.png"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
 class ImageAcquirer
 {
     private:
-        // Default camera
+        /**
+         * Default cameras. Fallback mode with default image
+         * */
         ImageAcquirerSingleCamera _img1;
         ImageAcquirerSingleCamera _img2;
 
-        cv::Mat _K2, _Kref, _R2, _T2;
-
     public:
-        ImageAcquirer();
+        ImageAcquirer(std::string path1 = DEFAULT_PATH_IMAGE_1, 
+                      std::string path2 = DEFAULT_PATH_IMAGE_2);
 
+        /**
+         * Get attributes 
+         * */
         ImageAcquirerSingleCamera& acquirer1();
         ImageAcquirerSingleCamera& acquirer2();
 };

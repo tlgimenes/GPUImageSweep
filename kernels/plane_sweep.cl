@@ -170,7 +170,7 @@ __kernel void compute_plane (
                 im2.y = (float)m2.y / (float)m2.z;
             }
             else {
-                im2 = 10;
+                im2 = 0;
             }
 
             if((N-1) < im2.x && im2.x < (width-N) && (N-1) < im2.y && im2.y < (height-N)) // coordinates must be valid
@@ -187,17 +187,13 @@ __kernel void compute_plane (
         model3D[curr].z = -(0.5) * (float)plane_id / (float)homography_size; 
         if(plane_id == -100) {
             model3D[curr].z = -2;
-            image1[curr].x = 255;
-            image1[curr].y = 0;
-            image1[curr].z = 0;
+            image1[curr].w = 0;
         }
     }
     else {
         model3D[curr].z = -2;
-        image1[curr].x = 0;
-        image1[curr].y = 0;
-        image1[curr].z = 255;
-        }
+        image1[curr].w = 0;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

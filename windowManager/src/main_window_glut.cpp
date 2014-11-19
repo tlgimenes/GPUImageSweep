@@ -56,24 +56,23 @@ float MainWindowGlut::scale[3] = {1.7, 1.7, 0.3};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager)
+void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager, 
+       cv::Matx33d A1, cv::Matx33d A2, cv::Vec3d B1, cv::Vec3d B2, 
+       float d_min, float d_max, int n_planes)
 {
     /* Sets objects */
     MainWindowGlut::clgl= &clgl;
     MainWindowGlut::wmanager = &wmanager;
 
+    // Creates CLGL images. The push automaticaly data to the GPU
     MainWindowGlut::img1 = new CLGLImage(clgl, img.acquirer1());
     MainWindowGlut::img2 = new CLGLImage(clgl, img.acquirer2());
-    MainWindowGlut::img = MainWindowGlut::img1;
+    MainWindowGlut::img = MainWindowGlut::img1; // current image beeing shown
 
-    cv::Matx33d A1, A2;
-    cv::Vec3d B1, B2;
-    std::ifstream f1("../samples/face00.txt");
-    std::ifstream f2("../samples/face01.txt");
-    for (int i=0;i<3;i++) f1 >> A1(i,0) >> A1(i,1) >> A1(i,2) >> B1[i]; 
-    for (int i=0;i<3;i++) f2 >> A2(i,0) >> A2(i,1) >> A2(i,2) >> B2[i]; 
+    // Creates a CLGL projection matrix. Data is pushed automaticaly to the GPU
+    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, d_min, d_max, n_planes, *MainWindowGlut::clgl);
 
-    MainWindowGlut::proj = new CLGLProjection(A1, B1, A2, B2, 237, 280, 40, *MainWindowGlut::clgl);
+    // Encodes the plane sweep algorithm
     MainWindowGlut::planeSweep = new PlaneSweep(*MainWindowGlut::clgl, *MainWindowGlut::proj, 
             *MainWindowGlut::img1, *MainWindowGlut::img2);
 
@@ -171,12 +170,14 @@ void MainWindowGlut::glutDisplayFunc_cb()
     clgl_assert(glGetError());
 
     // Indexed rendering for better performance !
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img->vertex_index_vbo_id());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MainWindowGlut::img->vertex_index_vbo_id());
     clgl_assert(glGetError());
 
     // Draw the triangles !
-    //glDrawElements (GL_TRIANGLES, MainWindowGlut::img->num_index_elements(), GL_UNSIGNED_INT, 0);
-    glDrawArrays(GL_POINTS, 0, MainWindowGlut::img->num_vertex());
+    // Draw triangle mesh
+    //glDrawElements (GL_TRIANGLES, MainWindowGlut::img->num_index_elements(), GL_UNSIGNED_INT, 0); 
+    // Draw Point cloud !
+    glDrawArrays(GL_POINTS, 0, MainWindowGlut::img->num_vertex()); 
     clgl_assert(glGetError());
 
     glFlush();

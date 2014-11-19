@@ -13,9 +13,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-ImageAcquirer::ImageAcquirer() :
-    _img1(0, DEFAULT_PATH_IMAGE_1),
-    _img2(1, DEFAULT_PATH_IMAGE_2)
+ImageAcquirer::ImageAcquirer(std::string path1, std::string path2) :
+    _img1(0, path1),
+    _img2(1, path2)
 {
     if(_img1.webcam_mode() != _img2.webcam_mode()) 
     {

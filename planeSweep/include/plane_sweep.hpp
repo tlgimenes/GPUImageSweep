@@ -27,7 +27,6 @@ class PlaneSweep
 
         /* ID's of different kernels used in the plane sweep algorithm */
         int _compute_plane_kernel_id; // ID of the compute_plane kernel
-        int _project_plane_kernel_id; // ID of the project_plane kernel
 
         /**
          *  Buffer containing the index of each chosen plane for each pixel 
@@ -38,7 +37,6 @@ class PlaneSweep
          * Number of threads to launch for each kernel  
          * */
         int _n_threads_compute_plane_kernel; // number of threads to launch for the compute_plane kernel
-        int _n_threads_project_plane_kernel; // number of threads to launch for the project_plane kernel
 
     protected:
         /**
@@ -53,7 +51,6 @@ class PlaneSweep
          * Runs each kernel  
          * */
         void run_compute_plane_kernel(); // runs the compute_plane kernel
-        void run_project_plane_kernel(); // runs the project_plane kernel
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

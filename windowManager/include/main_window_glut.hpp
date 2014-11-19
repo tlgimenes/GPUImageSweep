@@ -30,17 +30,17 @@
 class MainWindowGlut
 {
     public:
-        static WindowManager* wmanager;
-        static CLGLImage *img1, *img2;
-        static CLGLImage *img; //current image beeing shown
-        static CLGLProjection *proj;
-        static PlaneSweep* planeSweep;
-        static CLGL* clgl;
+        static WindowManager* wmanager; // manager
+        static CLGLImage *img1, *img2;  // CL-GL image interface
+        static CLGLImage *img;          // current image beeing shown
+        static CLGLProjection *proj;    // CL-GL projection matrix interface 
+        static PlaneSweep* planeSweep;  // Plane sweep algorithm 
+        static CLGL* clgl;              // CLGL manager
 
-        static int height,width;
+        static int height, width; // app height and width
 
-        static bool showInfo;
-        static int play;
+        static bool showInfo;   // show FPS...
+        static int play;        // Run the plane_sweep algorithm 
 
         // fps counter
         static float fps;
@@ -59,7 +59,13 @@ class MainWindowGlut
         static int mouse_old_y;
         static float scale[3];
 
-        static void start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager);
+        /**
+         * Creates CLGL images, CLGL projection matrices and sets the plane
+         * sweep algorithm. This fuction also sets some callbacks for GLUT
+         * */
+        static void start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanager, 
+                cv::Matx33d A1, cv::Matx33d A2, cv::Vec3d B1, cv::Vec3d B2, 
+                float d_min, float d_max, int n_planes);
 
         /**
          * Glut's callbacks 
