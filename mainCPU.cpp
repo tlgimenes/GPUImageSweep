@@ -90,13 +90,13 @@ Matx33d homography(const Plane& P, const Camera& C1, const Camera& C2){
 int main( int argc, char** argv )
 {
 	Data D;
-	D.I1=imread("../samples/face00R.tif");
-	D.I2=imread("../samples/face01R.tif");
+	D.I1=imread("../samples/visualize/08.jpg");
+	D.I2=imread("../samples/visualize/09.jpg");
 	imshow("I1",D.I1);
 	imshow("I2",D.I2);
 
-	D.C1.read("../samples/face00.txt");
-	D.C2.read("../samples/face01.txt");
+	D.C1.read("../samples/calib/matrix08.txt");
+	D.C2.read("../samples/calib/matrix09.txt");
 	D.C1.print();
 	D.C2.print();
 
@@ -124,13 +124,13 @@ int main( int argc, char** argv )
 	P.normal=D.middleVector();
 	Mat correlation = Mat::zeros( D.F1.size(), CV_32FC1 );
 	Mat matchPlane=Mat::zeros( D.F1.size(), CV_32FC1 );
-	int minp=237;
-	int maxp=280;
+	int minp=2370;
+	int maxp=4000;
 	for(int p=minp;p<maxp;p++){
 		P.d=p;
-		cout<<P.d<<endl;
+		//cout<<P.d<<endl;
 		Matx33d hm=homography(P,D.C1,D.C2);
-        std::cout << hm << std::endl;
+        //std::cout << hm << std::endl;
 		for(int i=n;i<D.F1.rows-n;i++){
 			for(int j=n;j<D.F1.cols-n;j++){
 				Vec3d img=hm*Vec3d(i,j,1);

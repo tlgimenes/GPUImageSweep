@@ -109,7 +109,8 @@ void MainWindowGlut::start(ImageAcquirer& img, CLGL& clgl, WindowManager& wmanag
     glTranslatef(0.0, 0.0, MainWindowGlut::translate_z);
     glScalef(MainWindowGlut::scale[0], MainWindowGlut::scale[1], MainWindowGlut::scale[2]);
 
-    }
+    //glEnable(GL_DEPTH_TEST); // Enable/Disable z-buffer
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

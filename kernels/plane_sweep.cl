@@ -34,7 +34,7 @@ float mean(
     {
 		for (int i=-n;i<=n;i++) 
         {
-            s += (float)image[index(m.x+i,m.y+j,width)].x;
+            s += ((float)image[index(m.x+i,m.y+j,width)].x + (float)image[index(m.x+i,m.y+j,width)].y + (float)image[index(m.x+i,m.y+j,width)].z)/3.0;
         }
     }
     s = s/(float)(2*n+1);
@@ -62,8 +62,8 @@ float corr(
     {
 		for (int i=-n;i<=n;i++) 
         {
-            px1 = image1[index(m1.x+i,m1.y+j,width)].x;
-            px2 = image2[index(m2.x+i,m2.y+j,width)].x;
+            px1 = (image1[index(m1.x+i,m1.y+j,width)].x + image1[index(m1.x+i,m1.y+j,width)].y + image1[index(m1.x+i,m1.y+j,width)].z)/3.0;
+            px2 = (image2[index(m2.x+i,m2.y+j,width)].x + image2[index(m2.x+i,m2.y+j,width)].y + image2[index(m2.x+i,m2.y+j,width)].z)/3.0;
 
             rho += (px1 - M1) * (px2 - M2);
 		}
@@ -186,13 +186,13 @@ __kernel void compute_plane (
         }
         model3D[curr].z = -(0.5) * (float)plane_id / (float)homography_size; 
         if(plane_id == -100) {
-            model3D[curr].z = -2;
-            image1[curr].w = 0;
+            model3D[curr].z = 0;
+            image1[curr].x = 0;
         }
     }
     else {
-        model3D[curr].z = -2;
-        image1[curr].w = 0;
+        model3D[curr].z = 0;
+        image1[curr].x = 0;
     }
 }
 

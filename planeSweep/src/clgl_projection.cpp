@@ -35,7 +35,7 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
     cv_mat_to_eigen_vector3f(B1, _B1);
     cv_mat_to_eigen_vector3f(B2, _B2);
 
-    _n = (_A1.block(2,0,1,3)).transpose() + (_A2.block(2,0,1,3)).transpose(); // Last line of matrix A1
+    _n = _A1.block(2,0,1,3).transpose() /*+ (_A2.block(2,0,1,3)).transpose()*/; // Last line of matrix A1
     _n.normalize();           // Normalizes the normal
 
     _C1 = -_A1.inverse()*_B1;
@@ -45,7 +45,7 @@ CLGLProjection::CLGLProjection(cv::Matx33d& A1, cv::Vec3d& B1, cv::Matx33d& A2, 
     std::vector<point4D<GLfloat>> H_k;
     float d_k;
 
-    for(int i=1; i <= n_planes; i++)
+    for(int i=0; i < n_planes; i++)
     {
         d_k = d_min + _delta * i;
         H_k.clear();
@@ -69,8 +69,9 @@ void CLGLProjection::projection_for_dist(float d_k, std::vector<point4D<GLfloat>
 
 void CLGLProjection::homography_for_dist(float d_k, std::vector<point4D<GLfloat>>& H_k)
 {
-    double tmp = _n.transpose() * (_A1.inverse() * _B1  + _C1);
-    double lambda = tmp + d_k;
+    //double tmp = _n.transpose() * (_A1.inverse() * _B1 /*+ _C1*/);
+    double lambda = d_k;// + tmp;
+    std::cout << " lambda: " << lambda << std::endl;
        
     Eigen::Matrix3f H;
 
