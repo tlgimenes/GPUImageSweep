@@ -4,7 +4,7 @@ GPUImageSweep
 Introduction
 ------------
 
-This coda is an Open{CV,CL,GL} implementation of the plan sweep algorithm. For
+This code is an Open{CV,CL,GL} implementation of the plan sweep algorithm. For
 comparation purposes a cpu implementation showing a gray contrast intead of a 
 3D model was made.
 
@@ -21,7 +21,7 @@ a Windows tester, please mail the developpers.
 - GLUT
 - GLEW
 
-**-> Linux:**
+**Linux:**
 
 *Compiling:*
 
@@ -49,7 +49,7 @@ to compile the code
 
 You should be good to go now
 
-**-> Windows:**
+**Windows:**
 
 It should work well the compiling part, but the code was never tested on windows, so good luck !
 
