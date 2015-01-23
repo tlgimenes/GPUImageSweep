@@ -71,7 +71,6 @@ void CLGLProjection::homography_for_dist(float d_k, std::vector<point4D<GLfloat>
 {
     //double tmp = _n.transpose() * (_A1.inverse() * _B1 /*+ _C1*/);
     double lambda = d_k;// + tmp;
-    std::cout << " lambda: " << lambda << std::endl;
        
     Eigen::Matrix3f H;
 
